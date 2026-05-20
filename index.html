@@ -1689,6 +1689,28 @@ function saveAdminUsers() { localStorage.setItem('spotAwards_adminUsers', JSON.s
 
 const ALL_DUS = ["AI MANAGED SERVICES - JANET","AI MANAGED SERVICES - JYOTI","AI MANAGED SERVICES - LEGAL","AI MANAGED SERVICES - ROMMEL","AI MANAGED SERVICES - SANJAY","AI/LLM Practice","AI/LLM Practice-MUSTANG","Admin & Facilities - Philippines","Agility - Customer Service","Agility - Delivery","Engineering - Philippines","Finance","Global Technology - Philippines","Human Resource - Philippines","Integrated Solution Center","Marketing","NO MATCH","Operations Planning Group","Quality Assurance - Philippines","Synodex"];
 
+// ─── FACILITY CONFIGURATION ──────────────────────────────────────────────────
+// Facilities represent physical office/site categories.
+// Map Employee ID prefixes to their facility. Add EBAR prefixes when that
+// facility's employees are loaded. Employees that match no prefix → 'EBAR'
+// (reserved for future facility data).
+const FACILITIES = ['IKSI-Leg', 'IKSI-Mde', 'EBAR'];
+const FACILITY_PREFIX_MAP = {
+  // IKSI-Leg: employees whose IDs start with these prefixes
+  'IKSI-Leg': ['2PH'],
+  // IKSI-Mde: employees whose IDs start with these prefixes
+  'IKSI-Mde': ['3PH'],
+  // EBAR: not yet in dataset — will auto-catch any unmatched employees
+};
+function getFacility(empId) {
+  if (!empId) return 'EBAR';
+  for (const [facility, prefixes] of Object.entries(FACILITY_PREFIX_MAP)) {
+    if (prefixes.some(p => empId.startsWith(p))) return facility;
+  }
+  return 'IKSI-Leg'; // default for all other existing alphanumeric IDs
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 let adminTab = 'nominations';
 
 function renderAdmin(mc) {
@@ -1709,6 +1731,17 @@ function renderAdmin(mc) {
 
     <div id="adminNominations" style="${adminTab!=='nominations'?'display:none':''}">
       <div class="stats-row" id="adminStats"></div>
+      <div class="card" style="margin-bottom:1.25rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;margin-bottom:1rem">
+          <div class="card-title" style="margin-bottom:0">Nominations Summary by Delivery Unit</div>
+          <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap">
+            <label style="font-size:0.78rem;color:var(--text-muted);white-space:nowrap">Filter by month:</label>
+            <input type="month" id="summaryMonthFilter" style="background:var(--card-bg);border:1px solid rgba(255,255,255,0.12);color:var(--white);border-radius:6px;padding:0.3rem 0.55rem;font-size:0.82rem" oninput="renderDUSummaryTable()" value="">
+            <button class="btn-download all" style="font-size:0.78rem;padding:0.35rem 0.75rem" onclick="downloadSummaryCSV()">⬇ Download Summary</button>
+          </div>
+        </div>
+        <div id="duSummaryTable"></div>
+      </div>
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.75rem">
           <div class="card-title" style="margin-bottom:0">All Nominations</div>
@@ -2445,9 +2478,163 @@ function deleteAdminUser(id) {
   document.getElementById('adminUsers').innerHTML = renderUserManagement();
 }
 
+function renderDUSummaryTable() {
+  const el = document.getElementById('duSummaryTable');
+  if (!el) return;
+
+  // Apply optional month filter (value is "YYYY-MM" or "")
+  const monthFilter = (document.getElementById('summaryMonthFilter') || {}).value || '';
+  const filtered = monthFilter
+    ? nominations.filter(n => (n.period || '').startsWith(monthFilter) || (n.submittedAt || '').startsWith(monthFilter))
+    : nominations;
+
+  // Build per-DU counts, bucketed by facility
+  const duData = {};
+  ALL_DUS.forEach(du => {
+    duData[du] = { 'IKSI-Leg': 0, 'IKSI-Mde': 0, 'EBAR': 0, totalSubmitted: 0, totalApproved: 0 };
+  });
+
+  filtered.forEach(n => {
+    const du = (EMPLOYEES[n.nomineeId] || {}).du || n.nomineeDU || 'Unknown';
+    if (!duData[du]) duData[du] = { 'IKSI-Leg': 0, 'IKSI-Mde': 0, 'EBAR': 0, totalSubmitted: 0, totalApproved: 0 };
+    const facility = getFacility(n.nomineeId);
+    duData[du][facility]++;
+    duData[du].totalSubmitted++;
+    if (n.status === 'approved') duData[du].totalApproved++;
+  });
+
+  const rows = ALL_DUS.map(du => {
+    const d = duData[du];
+    const hasAny = d.totalSubmitted > 0;
+    return `<tr style="${hasAny ? '' : 'opacity:0.4'}">
+      <td style="font-weight:500;color:var(--white);padding:0.55rem 0.75rem">${du}</td>
+      <td style="text-align:center;color:#7EB8F5;padding:0.55rem 0.75rem">${d['IKSI-Leg'] || '—'}</td>
+      <td style="text-align:center;color:#C8A8F5;padding:0.55rem 0.75rem">${d['IKSI-Mde'] || '—'}</td>
+      <td style="text-align:center;color:#F0A04E;padding:0.55rem 0.75rem">${d['EBAR'] || '—'}</td>
+      <td style="text-align:center;font-weight:600;color:var(--white);padding:0.55rem 0.75rem">${d.totalSubmitted || '—'}</td>
+      <td style="text-align:center;font-weight:600;color:#4ECDB4;padding:0.55rem 0.75rem">${d.totalApproved || '—'}</td>
+    </tr>`;
+  }).join('');
+
+  // Grand totals
+  const totals = { 'IKSI-Leg': 0, 'IKSI-Mde': 0, 'EBAR': 0, submitted: 0, approved: 0 };
+  filtered.forEach(n => {
+    const facility = getFacility(n.nomineeId);
+    totals[facility]++;
+    totals.submitted++;
+    if (n.status === 'approved') totals.approved++;
+  });
+
+  const monthLabel = monthFilter
+    ? new Date(monthFilter + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+    : 'All Time';
+
+  el.innerHTML = `
+    <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.6rem">
+      Showing: <strong style="color:var(--gold)">${monthLabel}</strong>
+      &nbsp;·&nbsp; ${filtered.length} nomination${filtered.length !== 1 ? 's' : ''}
+    </div>
+    <div style="overflow-x:auto">
+      <table class="nom-table" style="font-size:0.82rem;width:100%">
+        <thead>
+          <tr>
+            <th style="text-align:left;min-width:210px">Delivery Unit</th>
+            <th style="text-align:center;min-width:90px;color:#7EB8F5">IKSI-Leg</th>
+            <th style="text-align:center;min-width:90px;color:#C8A8F5">IKSI-Mde</th>
+            <th style="text-align:center;min-width:80px;color:#F0A04E">EBAR</th>
+            <th style="text-align:center;min-width:130px">Total Submitted</th>
+            <th style="text-align:center;min-width:130px">Total Approved</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+        <tfoot>
+          <tr style="border-top:2px solid rgba(255,255,255,0.2);font-weight:700;background:rgba(255,255,255,0.04)">
+            <td style="color:var(--gold);padding:0.65rem 0.75rem">GRAND TOTAL</td>
+            <td style="text-align:center;color:#7EB8F5;padding:0.65rem 0.75rem">${totals['IKSI-Leg']}</td>
+            <td style="text-align:center;color:#C8A8F5;padding:0.65rem 0.75rem">${totals['IKSI-Mde']}</td>
+            <td style="text-align:center;color:#F0A04E;padding:0.65rem 0.75rem">${totals['EBAR']}</td>
+            <td style="text-align:center;color:var(--white);padding:0.65rem 0.75rem">${totals.submitted}</td>
+            <td style="text-align:center;color:#4ECDB4;padding:0.65rem 0.75rem">${totals.approved}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div style="margin-top:0.6rem;font-size:0.73rem;color:var(--text-muted)">
+      Facility derived from Employee ID prefix &nbsp;·&nbsp;
+      <span style="color:#7EB8F5">■</span> IKSI-Leg (2PH + other IDs) &nbsp;
+      <span style="color:#C8A8F5">■</span> IKSI-Mde (3PH IDs) &nbsp;
+      <span style="color:#F0A04E">■</span> EBAR (future dataset)
+    </div>`;
+}
+
+function downloadSummaryCSV() {
+  const monthFilter = (document.getElementById('summaryMonthFilter') || {}).value || '';
+  const filtered = monthFilter
+    ? nominations.filter(n => (n.period || '').startsWith(monthFilter) || (n.submittedAt || '').startsWith(monthFilter))
+    : nominations;
+
+  const monthLabel = monthFilter
+    ? new Date(monthFilter + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+    : 'All Time';
+
+  // Build per-DU data
+  const duData = {};
+  ALL_DUS.forEach(du => {
+    duData[du] = { 'IKSI-Leg': 0, 'IKSI-Mde': 0, 'EBAR': 0, totalSubmitted: 0, totalApproved: 0 };
+  });
+  filtered.forEach(n => {
+    const du = (EMPLOYEES[n.nomineeId] || {}).du || n.nomineeDU || 'Unknown';
+    if (!duData[du]) duData[du] = { 'IKSI-Leg': 0, 'IKSI-Mde': 0, 'EBAR': 0, totalSubmitted: 0, totalApproved: 0 };
+    const facility = getFacility(n.nomineeId);
+    duData[du][facility]++;
+    duData[du].totalSubmitted++;
+    if (n.status === 'approved') duData[du].totalApproved++;
+  });
+
+  const headers = ['Delivery Unit', 'IKSI-Leg', 'IKSI-Mde', 'EBAR', 'Total Nominations Submitted', 'Total Nominations Approved'];
+  const rows = ALL_DUS.map(du => {
+    const d = duData[du];
+    return [
+      `"${du}"`,
+      d['IKSI-Leg'],
+      d['IKSI-Mde'],
+      d['EBAR'],
+      d.totalSubmitted,
+      d.totalApproved
+    ].join(',');
+  });
+
+  // Totals row
+  const totals = { 'IKSI-Leg': 0, 'IKSI-Mde': 0, 'EBAR': 0, submitted: 0, approved: 0 };
+  filtered.forEach(n => {
+    const facility = getFacility(n.nomineeId);
+    totals[facility]++;
+    totals.submitted++;
+    if (n.status === 'approved') totals.approved++;
+  });
+  rows.push(['"GRAND TOTAL"', totals['IKSI-Leg'], totals['IKSI-Mde'], totals['EBAR'], totals.submitted, totals.approved].join(','));
+
+  const periodLine = `"Period: ${monthLabel}"`;
+  const csv = [periodLine, '', headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const filename = monthFilter
+    ? `nominations_summary_${monthFilter}.csv`
+    : `nominations_summary_all_time_${new Date().toISOString().slice(0,10)}.csv`;
+  a.download = filename;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); document.body.removeChild(a); }, 500);
+  toast(`⬇ Downloading summary${monthFilter ? ' for ' + monthLabel : ''}…`, 'info');
+}
+
 function updateAdminStats() {
   const stats = document.getElementById('adminStats');
   if (!stats) return;
+  renderDUSummaryTable();
   const total = nominations.length;
   const pending = nominations.filter(n => n.status === 'pending').length;
   const approved = nominations.filter(n => n.status === 'approved').length;
