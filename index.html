@@ -1571,6 +1571,20 @@ function submitNomination() {
   const achievement = document.getElementById('achievement').value.trim();
   if (!achievement) { toast('⚠️ Please describe the specific achievement.', 'warn'); return; }
 
+  // ── Nomination quota: 1 per employee per period (Mepai projects exempt) ──
+  if (!isMupaiProject(selectedNominee.project)) {
+    const period = document.getElementById('nomPeriod').value;
+    const duplicate = nominations.find(n =>
+      n.nomineeId === selectedNominee.id &&
+      n.period === period &&
+      n.status !== 'rejected'
+    );
+    if (duplicate) {
+      toast(`⚠️ ${selectedNominee.name} has already been nominated for this period.`, 'warn');
+      return;
+    }
+  }
+
   const nom = {
     id: 'NOM' + Date.now(),
     submittedAt: new Date().toISOString(),
@@ -1819,6 +1833,23 @@ function getFacility(empId) {
     if (prefixes.some(p => empId.startsWith(p))) return facility;
   }
   return 'IKSI-Leg'; // default for all other existing alphanumeric IDs
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─── MEPAI PROJECT EXEMPTION ──────────────────────────────────────────────────
+// Nominees whose project code matches any entry here are exempt from the
+// "one nomination per employee per period" quota.
+// Add the official Mepai project code(s) once they are in the employee dataset.
+const MUPAI_PROJECT_CODES = [
+  'MUPAI',   // Product Data Operations (Gen AI)
+  'MUPPD',   // Product Data Operations (Gen AI) variant
+  'MUPMS',   // MASE
+  'MUPSL',   // Superintelligence Lab LOB
+  '00MUP',   // Product Data Operations (Gen AI) cluster
+];
+function isMupaiProject(projectCode) {
+  if (!projectCode) return false;
+  return MUPAI_PROJECT_CODES.some(code => projectCode.toUpperCase() === code.toUpperCase());
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
