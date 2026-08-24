@@ -1290,6 +1290,37 @@ function renderManager(mc) {
           <div class="form-group full">
             <label>Supporting Evidence / Details</label>
             <textarea id="evidence" placeholder="Provide any supporting details, metrics, dates, or client feedback…" rows="3"></textarea>
+
+            <!-- Evidence attachments: Excel/CSV + Photos -->
+            <input type="file" id="evidenceFileInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleEvidenceFile(this.files[0])">
+            <input type="file" id="evidencePhotoInput" accept="image/*" multiple style="display:none" onchange="handleEvidencePhotos(this.files)">
+
+            <!-- Drop zone -->
+            <div id="evidenceDropZone"
+              style="margin-top:0.65rem;border:2px dashed rgba(0,0,0,0.12);border-radius:var(--radius-sm);padding:1rem 1.25rem;transition:all 0.2s;background:#F8F9FC;"
+              ondragover="event.preventDefault();document.getElementById('evidenceDropZone').style.borderColor='#B8860B';document.getElementById('evidenceDropZone').style.background='#FFFBF0'"
+              ondragleave="document.getElementById('evidenceDropZone').style.borderColor='rgba(0,0,0,0.12)';document.getElementById('evidenceDropZone').style.background='#F8F9FC'"
+              ondrop="event.preventDefault();document.getElementById('evidenceDropZone').style.borderColor='rgba(0,0,0,0.12)';document.getElementById('evidenceDropZone').style.background='#F8F9FC';handleEvidenceDrop(event.dataTransfer.files)">
+              <!-- Attach buttons -->
+              <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:0.75rem">
+                <button type="button" onclick="document.getElementById('evidenceFileInput').click()"
+                  style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.38rem 0.85rem;border-radius:6px;border:1.5px solid rgba(0,0,0,0.12);background:#fff;font-size:0.78rem;font-weight:600;color:#374151;cursor:pointer;transition:all 0.18s;font-family:inherit"
+                  onmouseover="this.style.borderColor='#B8860B';this.style.color='#B8860B'"
+                  onmouseout="this.style.borderColor='rgba(0,0,0,0.12)';this.style.color='#374151'">
+                  📊 Attach Spreadsheet
+                </button>
+                <button type="button" onclick="document.getElementById('evidencePhotoInput').click()"
+                  style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.38rem 0.85rem;border-radius:6px;border:1.5px solid rgba(0,0,0,0.12);background:#fff;font-size:0.78rem;font-weight:600;color:#374151;cursor:pointer;transition:all 0.18s;font-family:inherit"
+                  onmouseover="this.style.borderColor='#2563EB';this.style.color='#2563EB'"
+                  onmouseout="this.style.borderColor='rgba(0,0,0,0.12)';this.style.color='#374151'">
+                  🖼 Attach Photos
+                </button>
+                <span style="font-size:0.7rem;color:#9CA3AF;align-self:center">or drag &amp; drop files here</span>
+              </div>
+              <!-- Attachments list -->
+              <div id="evidenceAttachmentsList" style="display:none;display:flex;flex-direction:column;gap:0.5rem"></div>
+              <div id="evidenceEmptyHint" style="font-size:0.72rem;color:#C0C4CC;text-align:center;padding:0.25rem 0">No attachments yet</div>
+            </div>
           </div>
 
           <div class="form-group full">
@@ -1484,6 +1515,7 @@ function resetForm() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  clearEvidenceFile();
   clearPhoto();
   CATEGORIES.forEach(c => {
     const lbl = document.getElementById(`cat_${c.replace(/ /g,'_')}_label`);
@@ -1494,6 +1526,135 @@ function resetForm() {
 // ─── Awardee Photo Handling ────────────────────────────────
 let awardeePhotoData = null;   // base64 data URL
 let awardeePhotoName = null;   // original filename
+
+// Evidence attachments: one spreadsheet + multiple photos
+let evidenceFileData = null;   // { name, rows, headers, sheetName, totalRows }
+let evidencePhotos = [];       // [{ name, dataUrl }]
+
+function handleEvidenceDrop(files) {
+  Array.from(files).forEach(f => {
+    const ext = f.name.split('.').pop().toLowerCase();
+    if (['xlsx','xls','csv'].includes(ext)) handleEvidenceFile(f);
+    else if (['jpg','jpeg','png','gif','webp','bmp'].includes(ext)) handleEvidencePhotos([f]);
+    else toast(`Unsupported file type: .${ext}`, 'warn');
+  });
+}
+
+function handleEvidenceFile(file) {
+  if (!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!['xlsx','xls','csv'].includes(ext)) {
+    toast('Please upload an Excel (.xlsx, .xls) or CSV file.', 'warn'); return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const sheetName = wb.SheetNames[0];
+      const ws = wb.Sheets[sheetName];
+      const rawRows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      if (!rawRows.length) { toast('The file appears to be empty.', 'warn'); return; }
+      const headers = rawRows[0].map(String);
+      const dataRows = rawRows.slice(1).filter(r => r.some(c => c !== ''));
+      evidenceFileData = { name: file.name, headers, rows: dataRows, sheetName, totalRows: dataRows.length };
+      renderEvidenceAttachments();
+      toast('📊 Spreadsheet attached.', 'success');
+    } catch(err) { toast('Could not read file. Make sure it is a valid Excel or CSV.', 'warn'); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function handleEvidencePhotos(files) {
+  const allowed = ['jpg','jpeg','png','gif','webp','bmp'];
+  Array.from(files).forEach(file => {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!allowed.includes(ext)) { toast(`${file.name}: not a supported image type.`, 'warn'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      evidencePhotos.push({ name: file.name, dataUrl: e.target.result });
+      renderEvidenceAttachments();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeEvidencePhoto(idx) {
+  evidencePhotos.splice(idx, 1);
+  renderEvidenceAttachments();
+}
+
+function removeEvidenceFile() {
+  evidenceFileData = null;
+  const inp = document.getElementById('evidenceFileInput');
+  if (inp) inp.value = '';
+  renderEvidenceAttachments();
+}
+
+function renderEvidenceAttachments() {
+  const list = document.getElementById('evidenceAttachmentsList');
+  const hint = document.getElementById('evidenceEmptyHint');
+  if (!list) return;
+  const hasAny = evidenceFileData || evidencePhotos.length > 0;
+  hint.style.display = hasAny ? 'none' : 'block';
+
+  let html = '';
+
+  // Spreadsheet row
+  if (evidenceFileData) {
+    const { name, headers, rows, totalRows } = evidenceFileData;
+    const thCells = headers.map(h =>
+      `<th style="padding:0.25rem 0.55rem;font-size:0.65rem;font-weight:600;text-transform:uppercase;color:#6B7280;white-space:nowrap;background:#F4F6FB;border-bottom:1px solid rgba(0,0,0,0.07)">${h}</th>`
+    ).join('');
+    const trRows = rows.slice(0,5).map(r =>
+      `<tr>${headers.map((_,i) => `<td style="padding:0.25rem 0.55rem;font-size:0.72rem;color:#374151;border-bottom:1px solid rgba(0,0,0,0.04);white-space:nowrap">${r[i] ?? ''}</td>`).join('')}</tr>`
+    ).join('');
+    const moreRow = totalRows > 5
+      ? `<tr><td colspan="${headers.length}" style="padding:0.25rem 0.55rem;font-size:0.68rem;color:#9CA3AF;font-style:italic">… ${totalRows-5} more rows</td></tr>` : '';
+    html += `<div style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0.45rem 0.75rem;background:#F4F6FB;border-bottom:1px solid rgba(0,0,0,0.07)">
+        <div style="display:flex;align-items:center;gap:0.5rem">
+          <span>📗</span>
+          <span style="font-size:0.78rem;font-weight:600;color:#1A1D2E">${name}</span>
+          <span style="font-size:0.7rem;color:#9CA3AF">${totalRows} rows · ${headers.length} cols</span>
+        </div>
+        <button type="button" onclick="removeEvidenceFile()" style="background:none;border:none;cursor:pointer;color:#DC2626;font-size:0.85rem;padding:0.1rem 0.3rem" title="Remove">✕</button>
+      </div>
+      <div style="overflow-x:auto;max-height:130px;overflow-y:auto">
+        <table style="width:100%;border-collapse:collapse"><thead><tr>${thCells}</tr></thead><tbody>${trRows}${moreRow}</tbody></table>
+      </div>
+    </div>`;
+  }
+
+  // Photo thumbnails
+  if (evidencePhotos.length > 0) {
+    const thumbs = evidencePhotos.map((p, i) =>
+      `<div style="position:relative;display:inline-block">
+        <img src="${p.dataUrl}" alt="${p.name}" title="${p.name}"
+          style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid rgba(0,0,0,0.10);display:block">
+        <button type="button" onclick="removeEvidencePhoto(${i})"
+          style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#DC2626;border:none;color:#fff;font-size:0.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
+        <div style="font-size:0.6rem;color:#6B7280;text-align:center;margin-top:0.2rem;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</div>
+      </div>`
+    ).join('');
+    html += `<div style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:0.65rem 0.75rem;background:#F8F9FC">
+      <div style="font-size:0.72rem;font-weight:600;color:#6B7280;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.05em">📷 Photo Evidence (${evidencePhotos.length})</div>
+      <div style="display:flex;flex-wrap:wrap;gap:0.6rem">${thumbs}</div>
+    </div>`;
+  }
+
+  list.innerHTML = html;
+  list.style.display = hasAny ? 'flex' : 'none';
+}
+
+function clearEvidenceFile() {
+  evidenceFileData = null;
+  evidencePhotos = [];
+  const inp = document.getElementById('evidenceFileInput');
+  if (inp) inp.value = '';
+  const pinp = document.getElementById('evidencePhotoInput');
+  if (pinp) pinp.value = '';
+  renderEvidenceAttachments();
+}
 
 function handlePhotoDrop(event) {
   event.preventDefault();
@@ -1605,6 +1766,14 @@ function submitNomination() {
     category: selectedCat,
     achievement,
     evidence: document.getElementById('evidence').value.trim(),
+    evidenceFile: evidenceFileData ? {
+      name: evidenceFileData.name,
+      sheetName: evidenceFileData.sheetName,
+      headers: evidenceFileData.headers,
+      rows: evidenceFileData.rows,
+      totalRows: evidenceFileData.totalRows,
+    } : null,
+    evidencePhotos: evidencePhotos.length ? evidencePhotos.map(p => ({ name: p.name, dataUrl: p.dataUrl })) : [],
     awardeePhoto: awardeePhotoData || null,
     awardeePhotoName: awardeePhotoName || null,
     approverRemarks: '',
@@ -1777,7 +1946,36 @@ function renderReviewCard(n) {
       </div>
 
       <div class="nom-review-achievement">${n.achievement}</div>
-      ${n.evidence ? `<div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem"><strong>Evidence:</strong> ${n.evidence}</div>` : ''}
+      ${n.evidence ? `<div style="font-size:0.8rem;color:#6B7280;margin-bottom:0.75rem"><strong style="color:#374151">Supporting Notes:</strong> ${n.evidence}</div>` : ''}
+      ${n.evidenceFile ? `
+        <div style="margin-bottom:0.75rem;border:1px solid rgba(0,0,0,0.08);border-radius:8px;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:0.5rem;padding:0.45rem 0.75rem;background:#F4F6FB;border-bottom:1px solid rgba(0,0,0,0.07)">
+            <span>📗</span>
+            <span style="font-size:0.78rem;font-weight:600;color:#1A1D2E">${n.evidenceFile.name}</span>
+            <span style="font-size:0.7rem;color:#9CA3AF">${n.evidenceFile.totalRows} rows · ${n.evidenceFile.headers.length} cols</span>
+          </div>
+          <div style="overflow-x:auto;max-height:140px;overflow-y:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:0.72rem">
+              <thead><tr>${n.evidenceFile.headers.map(h=>`<th style="padding:0.28rem 0.6rem;text-align:left;font-size:0.65rem;font-weight:600;text-transform:uppercase;color:#6B7280;white-space:nowrap;background:#F8F9FC;border-bottom:1px solid rgba(0,0,0,0.07)">${h}</th>`).join('')}</tr></thead>
+              <tbody>${n.evidenceFile.rows.slice(0,8).map(r=>`<tr>${n.evidenceFile.headers.map((_,i)=>`<td style="padding:0.28rem 0.6rem;color:#374151;border-bottom:1px solid rgba(0,0,0,0.04);white-space:nowrap">${r[i]??''}</td>`).join('')}</tr>`).join('')}${n.evidenceFile.totalRows>8?`<tr><td colspan="${n.evidenceFile.headers.length}" style="padding:0.28rem 0.6rem;color:#9CA3AF;font-style:italic">… ${n.evidenceFile.totalRows-8} more rows</td></tr>`:''}</tbody>
+            </table>
+          </div>
+        </div>` : ''}
+      ${n.evidencePhotos && n.evidencePhotos.length ? `
+        <div style="margin-bottom:0.75rem;border:1px solid rgba(0,0,0,0.08);border-radius:8px;overflow:hidden">
+          <div style="padding:0.45rem 0.75rem;background:#F4F6FB;border-bottom:1px solid rgba(0,0,0,0.07);font-size:0.72rem;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em">
+            📷 Photo Evidence (${n.evidencePhotos.length})
+          </div>
+          <div style="padding:0.65rem 0.75rem;display:flex;flex-wrap:wrap;gap:0.6rem">
+            ${n.evidencePhotos.map(p=>`
+              <div style="text-align:center">
+                <img src="${p.dataUrl}" alt="${p.name}" title="${p.name}"
+                  style="width:90px;height:90px;object-fit:cover;border-radius:6px;border:1px solid rgba(0,0,0,0.10);cursor:pointer;display:block"
+                  onclick="window.open(this.src,'_blank')">
+                <div style="font-size:0.62rem;color:#6B7280;margin-top:0.2rem;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</div>
+              </div>`).join('')}
+          </div>
+        </div>` : ''}
 
       <div class="nom-review-actions">
         <textarea id="rem_${n.id}" class="remarks-input" placeholder="Add approver remarks (optional)…" rows="2" style="flex:1;min-height:0"></textarea>
