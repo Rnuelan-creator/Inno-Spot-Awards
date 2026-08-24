@@ -9,26 +9,26 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root {
-  --gold: #C9A84C;
-  --gold-light: #E8D08A;
+  --gold: #B8860B;
+  --gold-light: #D4A017;
   --gold-dark: #8B6914;
-  --ink: #0F0F14;
-  --ink2: #1C1C28;
-  --ink3: #2A2A3A;
-  --mist: #F5F3EE;
-  --mist2: #EAE7E0;
-  --white: #FDFCFA;
-  --accent-blue: #2D5B8E;
-  --accent-teal: #1A7B6B;
-  --accent-amber: #C96A1A;
-  --accent-rose: #C94B4B;
-  --text: #1C1C28;
-  --text-soft: #5A5A72;
-  --text-muted: #8A8AA8;
-  --border: rgba(201,168,76,0.2);
-  --border-strong: rgba(201,168,76,0.5);
-  --shadow: 0 4px 24px rgba(15,15,20,0.15);
-  --shadow-lg: 0 12px 48px rgba(15,15,20,0.25);
+  --ink: #FFFFFF;
+  --ink2: #F8F9FC;
+  --ink3: #EEF0F5;
+  --mist: #F0F2F7;
+  --mist2: #E4E7EF;
+  --white: #1A1D2E;
+  --accent-blue: #2563EB;
+  --accent-teal: #0D9488;
+  --accent-amber: #D97706;
+  --accent-rose: #DC2626;
+  --text: #1A1D2E;
+  --text-soft: #374151;
+  --text-muted: #6B7280;
+  --border: rgba(0,0,0,0.08);
+  --border-strong: rgba(0,0,0,0.16);
+  --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
   --radius: 12px;
   --radius-sm: 8px;
 }
@@ -37,8 +37,8 @@
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  background: var(--ink);
-  color: var(--white);
+  background: #F0F2F7;
+  color: #1A1D2E;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -50,11 +50,10 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: 
-    radial-gradient(ellipse 70% 55% at 20% 20%, rgba(90,50,150,0.18) 0%, transparent 65%),
-    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(201,140,40,0.14) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 50% 0%, rgba(201,168,76,0.10) 0%, transparent 55%),
-    var(--ink);
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 20%, rgba(37,99,235,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 45% at 85% 80%, rgba(184,134,11,0.08) 0%, transparent 55%),
+    linear-gradient(160deg, #F8F9FC 0%, #EEF0F5 100%);
   padding: 2rem;
   position: relative;
   overflow: hidden;
@@ -64,9 +63,9 @@ body {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-image: 
-    repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(201,168,76,0.03) 59px, rgba(201,168,76,0.03) 60px),
-    repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(201,168,76,0.03) 59px, rgba(201,168,76,0.03) 60px);
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(0,0,0,0.025) 59px, rgba(0,0,0,0.025) 60px),
+    repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(0,0,0,0.025) 59px, rgba(0,0,0,0.025) 60px);
   pointer-events: none;
 }
 
@@ -77,7 +76,7 @@ body {
   display: flex; align-items: center; justify-content: center;
   font-size: 2rem;
   margin-bottom: 2rem;
-  background: radial-gradient(circle, rgba(201,168,76,0.1), transparent);
+  background: radial-gradient(circle, rgba(184,134,11,0.08), transparent);
   animation: pulse 3s ease-in-out infinite;
 }
 
@@ -92,7 +91,7 @@ body {
   font-weight: 600;
   text-align: center;
   line-height: 1.1;
-  background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+  background: linear-gradient(135deg, #D4A017, #B8860B, #8B6914);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -101,7 +100,7 @@ body {
 
 .landing-subtitle {
   font-size: 0.95rem;
-  color: var(--text-muted);
+  color: #6B7280;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   text-align: center;
@@ -117,38 +116,36 @@ body {
 }
 
 .role-card {
-  background: rgba(255,255,255,0.04);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: #FFFFFF;
+  border: 1.5px solid rgba(0,0,0,0.07);
   border-radius: 20px;
   padding: 2.25rem 1.875rem 1.75rem;
   cursor: pointer;
-  transition: all 0.35s cubic-bezier(0.25,0.46,0.45,0.94);
+  transition: all 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
   position: relative;
   overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
 }
 
-/* gradient border shimmer on top */
+/* colored top accent bar */
 .role-card::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent 0%, var(--card-accent, var(--gold)) 50%, transparent 100%);
+  height: 3px;
+  background: linear-gradient(90deg, transparent 0%, var(--card-accent, #B8860B) 50%, transparent 100%);
   opacity: 0;
-  transition: opacity 0.35s;
+  transition: opacity 0.3s;
 }
 
-/* ambient glow pseudo element */
 .role-card::after {
   content: '';
   position: absolute;
   inset: 0;
   border-radius: 20px;
-  background: radial-gradient(ellipse 80% 60% at 50% 130%, var(--card-glow, rgba(201,168,76,0.12)) 0%, transparent 70%);
+  background: radial-gradient(ellipse 80% 50% at 50% 130%, var(--card-glow, rgba(184,134,11,0.06)) 0%, transparent 70%);
   opacity: 0;
-  transition: opacity 0.35s;
+  transition: opacity 0.3s;
   pointer-events: none;
 }
 
@@ -156,14 +153,14 @@ body {
 .role-card:hover::after  { opacity: 1; }
 
 .role-card:hover {
-  border-color: rgba(255,255,255,0.14);
-  transform: translateY(-6px);
-  box-shadow: 0 24px 56px rgba(0,0,0,0.5), 0 0 0 1px var(--card-accent, var(--gold)) inset, 0 0 32px var(--card-glow, rgba(201,168,76,0.18));
+  border-color: var(--card-accent, #B8860B);
+  transform: translateY(-5px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.10), 0 0 0 1px var(--card-accent, #B8860B);
 }
 
-.role-card[data-role="manager"]  { --card-accent: var(--gold);        --card-glow: rgba(201,168,76,0.16); }
-.role-card[data-role="approver"] { --card-accent: var(--accent-teal);  --card-glow: rgba(78,205,180,0.14); }
-.role-card[data-role="admin"]    { --card-accent: var(--accent-blue);  --card-glow: rgba(126,184,245,0.14); }
+.role-card[data-role="manager"]  { --card-accent: #B8860B;  --card-glow: rgba(184,134,11,0.07); }
+.role-card[data-role="approver"] { --card-accent: #0D9488;  --card-glow: rgba(13,148,136,0.06); }
+.role-card[data-role="admin"]    { --card-accent: #2563EB;  --card-glow: rgba(37,99,235,0.06); }
 
 .role-icon {
   font-size: 2.4rem;
@@ -174,8 +171,8 @@ body {
   width: 64px;
   height: 64px;
   border-radius: 16px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: #F4F6FB;
+  border: 1px solid rgba(0,0,0,0.07);
 }
 
 .role-icon img { width: 2.4rem; height: 2.4rem; object-fit: contain; }
@@ -184,14 +181,14 @@ body {
   font-family: 'Cinzel', serif;
   font-size: 1.3rem;
   font-weight: 600;
-  color: var(--white);
+  color: #1A1D2E;
   margin-bottom: 0.5rem;
   letter-spacing: 0.02em;
 }
 
 .role-desc {
   font-size: 0.84rem;
-  color: var(--text-muted);
+  color: #6B7280;
   line-height: 1.65;
   margin-bottom: 1.25rem;
 }
@@ -205,8 +202,8 @@ body {
   text-transform: uppercase;
   color: var(--card-accent, var(--gold));
   opacity: 0.7;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: #F4F6FB;
+  border: 1px solid rgba(0,0,0,0.08);
   border-radius: 999px;
   padding: 0.2rem 0.6rem;
 }
@@ -231,8 +228,8 @@ body {
 #app-shell.active { display: flex; }
 
 .topbar {
-  background: var(--ink2);
-  border-bottom: 1px solid var(--border);
+  background: #FFFFFF;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
   padding: 0 2rem;
   height: 60px;
   display: flex;
@@ -241,7 +238,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 
 .topbar-brand {
@@ -256,7 +253,7 @@ body {
 
 .topbar-role {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: #6B7280;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -272,7 +269,7 @@ body {
   align-items: center;
   gap: 0.6rem;
   font-size: 0.85rem;
-  color: var(--text-soft);
+  color: #374151;
 }
 
 .avatar {
@@ -282,13 +279,13 @@ body {
   display: flex; align-items: center; justify-content: center;
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--ink);
+  color: #FFFFFF;
 }
 
 .btn-exit {
   background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
+  border: 1px solid rgba(0,0,0,0.12);
+  color: #6B7280;
   padding: 0.35rem 0.9rem;
   border-radius: 6px;
   font-size: 0.78rem;
@@ -296,7 +293,7 @@ body {
   transition: all 0.2s;
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
-.btn-exit:hover { border-color: var(--gold); color: var(--gold); }
+.btn-exit:hover { border-color: #B8860B; color: #B8860B; }
 
 .main-content {
   flex: 1;
@@ -310,7 +307,7 @@ body {
 .tabs {
   display: flex;
   gap: 0.25rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
   margin-bottom: 2rem;
 }
 
@@ -318,7 +315,7 @@ body {
   padding: 0.7rem 1.25rem;
   font-size: 0.85rem;
   font-weight: 500;
-  color: var(--text-muted);
+  color: #6B7280;
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
@@ -330,29 +327,30 @@ body {
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-.tab.active { color: var(--gold); border-bottom-color: var(--gold); }
-.tab:hover:not(.active) { color: var(--white); }
+.tab.active { color: #B8860B; border-bottom-color: #B8860B; }
+.tab:hover:not(.active) { color: #1A1D2E; }
 
 /* ===== CARDS ===== */
 .card {
-  background: var(--ink2);
-  border: 1px solid var(--border);
+  background: #FFFFFF;
+  border: 1px solid rgba(0,0,0,0.07);
   border-radius: var(--radius);
   padding: 1.75rem;
   margin-bottom: 1.5rem;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
 }
 
 .card-title {
   font-family: 'Cinzel', serif;
   font-size: 1.4rem;
   font-weight: 600;
-  color: var(--white);
+  color: #1A1D2E;
   margin-bottom: 0.35rem;
 }
 
 .card-subtitle {
   font-size: 0.82rem;
-  color: var(--text-muted);
+  color: #6B7280;
   margin-bottom: 1.5rem;
 }
 
@@ -374,18 +372,18 @@ body {
 label {
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--text-soft);
+  color: #374151;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 input, select, textarea {
-  background: var(--ink3);
-  border: 1px solid var(--border);
+  background: #F8F9FC;
+  border: 1.5px solid rgba(0,0,0,0.10);
   border-radius: var(--radius-sm);
   padding: 0.7rem 1rem;
   font-size: 0.9rem;
-  color: var(--white);
+  color: #1A1D2E;
   font-family: 'Plus Jakarta Sans', sans-serif;
   transition: border-color 0.2s, box-shadow 0.2s;
   outline: none;
@@ -393,20 +391,20 @@ input, select, textarea {
 }
 
 input:focus, select:focus, textarea:focus {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+  border-color: #B8860B;
+  box-shadow: 0 0 0 3px rgba(184,134,11,0.10);
 }
 
-input::placeholder, textarea::placeholder { color: var(--text-muted); }
+input::placeholder, textarea::placeholder { color: #9CA3AF; }
 
-select option { background: var(--ink2); }
+select option { background: #FFFFFF; color: #1A1D2E; }
 
 textarea { resize: vertical; min-height: 100px; }
 
 .auto-field {
-  background: rgba(201,168,76,0.05);
+  background: #F4F6FB;
   border-style: dashed;
-  color: var(--text-soft);
+  color: #6B7280;
   cursor: not-allowed;
 }
 
@@ -426,38 +424,38 @@ textarea { resize: vertical; min-height: 100px; }
 }
 
 .btn-gold {
-  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
-  color: var(--ink);
+  background: linear-gradient(135deg, #8B6914, #B8860B);
+  color: #FFFFFF;
 }
 .btn-gold:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.3); }
 
 .btn-outline {
   background: transparent;
-  border: 1px solid var(--border-strong);
-  color: var(--gold);
+  border: 1.5px solid #B8860B;
+  color: #B8860B;
 }
-.btn-outline:hover { background: rgba(201,168,76,0.08); }
+.btn-outline:hover { background: rgba(184,134,11,0.06); }
 
 .btn-ghost {
   background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-soft);
+  border: 1.5px solid rgba(0,0,0,0.12);
+  color: #374151;
 }
-.btn-ghost:hover { border-color: var(--text-soft); color: var(--white); }
+.btn-ghost:hover { border-color: #374151; color: #1A1D2E; }
 
 .btn-approve {
-  background: rgba(26,123,107,0.15);
-  border: 1px solid var(--accent-teal);
-  color: #4ECDB4;
+  background: rgba(13,148,136,0.08);
+  border: 1.5px solid #0D9488;
+  color: #0D9488;
 }
-.btn-approve:hover { background: rgba(26,123,107,0.3); }
+.btn-approve:hover { background: rgba(13,148,136,0.15); }
 
 .btn-reject {
-  background: rgba(201,75,75,0.1);
-  border: 1px solid var(--accent-rose);
-  color: #F07070;
+  background: rgba(220,38,38,0.06);
+  border: 1.5px solid #DC2626;
+  color: #DC2626;
 }
-.btn-reject:hover { background: rgba(201,75,75,0.25); }
+.btn-reject:hover { background: rgba(220,38,38,0.12); }
 
 .btn-sm { padding: 0.4rem 0.9rem; font-size: 0.78rem; }
 
@@ -474,9 +472,9 @@ textarea { resize: vertical; min-height: 100px; }
   text-transform: uppercase;
 }
 
-.badge-pending { background: rgba(201,106,26,0.15); color: #F0A04E; border: 1px solid rgba(201,106,26,0.3); }
-.badge-approved { background: rgba(26,123,107,0.15); color: #4ECDB4; border: 1px solid rgba(26,123,107,0.3); }
-.badge-rejected { background: rgba(201,75,75,0.12); color: #F07070; border: 1px solid rgba(201,75,75,0.3); }
+.badge-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FDE68A; }
+.badge-approved { background: #D1FAE5; color: #059669; border: 1px solid #A7F3D0; }
+.badge-rejected { background: #FEE2E2; color: #DC2626; border: 1px solid #FECACA; }
 
 /* ===== CATEGORY CHIPS ===== */
 .cat-chip {
@@ -485,23 +483,23 @@ textarea { resize: vertical; min-height: 100px; }
   font-size: 0.75rem; font-weight: 600;
 }
 
-.cat-brilliant { background: rgba(201,168,76,0.15); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
-.cat-extra { background: rgba(45,91,142,0.2); color: #7EB8F5; border: 1px solid rgba(45,91,142,0.4); }
-.cat-kudos { background: rgba(26,123,107,0.15); color: #4ECDB4; border: 1px solid rgba(26,123,107,0.3); }
+.cat-brilliant { background: #FEF9EC; color: #B8860B; border: 1px solid #F3D97A; }
+.cat-extra { background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE; }
+.cat-kudos { background: #F0FDFA; color: #0D9488; border: 1px solid #99F6E4; }
 
 /* ===== AUTOCOMPLETE ===== */
 .autocomplete-wrap { position: relative; }
 .autocomplete-list {
   position: absolute;
   top: 100%; left: 0; right: 0;
-  background: var(--ink2);
-  border: 1px solid var(--border-strong);
+  background: #FFFFFF;
+  border: 1.5px solid rgba(0,0,0,0.12);
   border-radius: var(--radius-sm);
   max-height: 220px;
   overflow-y: auto;
   z-index: 200;
   margin-top: 4px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.10);
   display: none;
 }
 .autocomplete-list.open { display: block; }
@@ -509,14 +507,15 @@ textarea { resize: vertical; min-height: 100px; }
   padding: 0.65rem 1rem;
   cursor: pointer;
   font-size: 0.85rem;
+  color: #1A1D2E;
   transition: background 0.15s;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(0,0,0,0.04);
 }
-.autocomplete-item:hover, .autocomplete-item.active { background: rgba(201,168,76,0.1); }
-.autocomplete-item strong { color: var(--gold); }
-.autocomplete-item small { color: var(--text-muted); display: block; font-size: 0.75rem; }
+.autocomplete-item:hover, .autocomplete-item.active { background: #FEF9EC; }
+.autocomplete-item strong { color: #B8860B; }
+.autocomplete-item small { color: #6B7280; display: block; font-size: 0.75rem; }
 .autocomplete-list::-webkit-scrollbar { width: 4px; }
-.autocomplete-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+.autocomplete-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
 
 /* ===== NOMINATIONS TABLE ===== */
 .nom-table-wrap { overflow-x: auto; }
@@ -532,26 +531,26 @@ textarea { resize: vertical; min-height: 100px; }
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-muted);
-  border-bottom: 1px solid var(--border);
+  color: #6B7280;
+  border-bottom: 1.5px solid rgba(0,0,0,0.08);
   white-space: nowrap;
 }
 .nom-table td {
   padding: 0.85rem 1rem;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  color: var(--white);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  color: #1A1D2E;
   vertical-align: top;
 }
-.nom-table tr:hover td { background: rgba(255,255,255,0.02); }
+.nom-table tr:hover td { background: #F8F9FC; }
 .nom-table tr:last-child td { border-bottom: none; }
 
 .td-name { font-weight: 500; }
-.td-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+.td-sub { font-size: 0.75rem; color: #6B7280; margin-top: 2px; }
 
 .empty-state {
   text-align: center;
   padding: 3rem;
-  color: var(--text-muted);
+  color: #9CA3AF;
 }
 .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
 .empty-text { font-size: 0.9rem; }
@@ -565,38 +564,40 @@ textarea { resize: vertical; min-height: 100px; }
 }
 
 .stat-card {
-  background: var(--ink2);
-  border: 1px solid var(--border);
+  background: #FFFFFF;
+  border: 1px solid rgba(0,0,0,0.07);
   border-radius: var(--radius);
   padding: 1.25rem 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 
 .stat-value {
   font-family: 'Cinzel', serif;
   font-size: 2.2rem;
   font-weight: 700;
-  color: var(--white);
+  color: #1A1D2E;
   line-height: 1;
   margin-bottom: 0.3rem;
 }
 
 .stat-label {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: #6B7280;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
 /* ===== APPROVER NOMINATION CARD ===== */
 .nom-review-card {
-  background: var(--ink2);
-  border: 1px solid var(--border);
+  background: #FFFFFF;
+  border: 1px solid rgba(0,0,0,0.07);
   border-radius: var(--radius);
   padding: 1.5rem;
   margin-bottom: 1rem;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
-.nom-review-card:hover { border-color: var(--border-strong); }
+.nom-review-card:hover { border-color: rgba(0,0,0,0.15); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
 
 .nom-review-header {
   display: flex;
@@ -611,12 +612,12 @@ textarea { resize: vertical; min-height: 100px; }
   font-family: 'Cinzel', serif;
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--white);
+  color: #1A1D2E;
 }
 
 .nom-review-meta {
   font-size: 0.8rem;
-  color: var(--text-muted);
+  color: #6B7280;
   margin-top: 0.2rem;
 }
 
@@ -629,21 +630,21 @@ textarea { resize: vertical; min-height: 100px; }
 
 .nom-review-item label {
   font-size: 0.68rem;
-  color: var(--text-muted);
+  color: #9CA3AF;
 }
 .nom-review-item p {
   font-size: 0.85rem;
-  color: var(--white);
+  color: #1A1D2E;
   margin-top: 0.15rem;
 }
 
 .nom-review-achievement {
-  background: rgba(255,255,255,0.03);
-  border-left: 3px solid var(--gold);
+  background: #FFFBF0;
+  border-left: 3px solid #B8860B;
   padding: 0.75rem 1rem;
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   font-size: 0.85rem;
-  color: var(--text-soft);
+  color: #374151;
   margin-bottom: 1rem;
   line-height: 1.6;
 }
@@ -690,13 +691,13 @@ textarea { resize: vertical; min-height: 100px; }
 }
 
 .toast {
-  background: var(--ink2);
-  border: 1px solid var(--border-strong);
+  background: #FFFFFF;
+  border: 1px solid rgba(0,0,0,0.10);
   border-radius: var(--radius-sm);
   padding: 0.85rem 1.25rem;
   font-size: 0.85rem;
-  color: var(--white);
-  box-shadow: var(--shadow-lg);
+  color: #1A1D2E;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -718,7 +719,7 @@ textarea { resize: vertical; min-height: 100px; }
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.7);
+  background: rgba(15,17,30,0.5);
   z-index: 500;
   align-items: center;
   justify-content: center;
@@ -727,13 +728,13 @@ textarea { resize: vertical; min-height: 100px; }
 .modal-overlay.open { display: flex; }
 
 .modal {
-  background: var(--ink2);
-  border: 1px solid var(--border-strong);
+  background: #FFFFFF;
+  border: none;
   border-radius: var(--radius);
   padding: 2rem;
   width: 100%;
   max-width: 520px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
   animation: modalIn 0.2s ease;
 }
 @keyframes modalIn {
@@ -745,12 +746,13 @@ textarea { resize: vertical; min-height: 100px; }
   font-family: 'Cinzel', serif;
   font-size: 1.4rem;
   font-weight: 600;
+  color: #1A1D2E;
   margin-bottom: 0.35rem;
 }
 
 .modal-subtitle {
   font-size: 0.82rem;
-  color: var(--text-muted);
+  color: #6B7280;
   margin-bottom: 1.5rem;
 }
 
@@ -770,9 +772,9 @@ textarea { resize: vertical; min-height: 100px; }
 
 /* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--ink); }
-::-webkit-scrollbar-thumb { background: var(--ink3); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+::-webkit-scrollbar-track { background: #F0F2F7; }
+::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 640px) {
@@ -796,18 +798,18 @@ textarea { resize: vertical; min-height: 100px; }
   font-family: 'Cinzel', serif;
   font-size: 1.8rem;
   font-weight: 600;
-  color: var(--white);
+  color: #1A1D2E;
 }
 
 .section-subtitle {
   font-size: 0.82rem;
-  color: var(--text-muted);
+  color: #6B7280;
   margin-top: 0.2rem;
 }
 
 .divider {
   height: 1px;
-  background: var(--border);
+  background: rgba(0,0,0,0.08);
   margin: 1.5rem 0;
 }
 
@@ -816,7 +818,7 @@ textarea { resize: vertical; min-height: 100px; }
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 0.75rem;
-  background: var(--ink3);
+  background: #F4F6FB;
   border-radius: var(--radius-sm);
   padding: 1rem 1.25rem;
   margin-bottom: 1.25rem;
@@ -1676,6 +1678,17 @@ function renderApprover(mc) {
   const pending = nominations.filter(n => n.status === 'pending' && (n.nomineeDU === du || n.managerDU === du));
   const reviewed = nominations.filter(n => n.status !== 'pending' && n.approvedBy === currentUser.id);
 
+  // Quota calculation
+  const period = getDUCurrentPeriod();
+  const quota = getDUQuota(du);
+  const headcount = getDUHeadcount(du);
+  const approvedThisPeriod = getDUApprovedCount(du, period);
+  const quotaRemaining = Math.max(0, quota - approvedThisPeriod);
+  const quotaPct = Math.min(100, quota > 0 ? Math.round((approvedThisPeriod / quota) * 100) : 0);
+  const quotaFull = approvedThisPeriod >= quota;
+  const quotaColor = quotaFull ? '#F07070' : quotaPct >= 80 ? '#F0A04E' : '#4ECDB4';
+  const periodLabel = new Date(period + '-01').toLocaleString('default', { month: 'long', year: 'numeric' });
+
   mc.innerHTML = `
     <div class="section-header">
       <div>
@@ -1697,6 +1710,24 @@ function renderApprover(mc) {
         <div class="stat-value" style="color:#F07070">${reviewed.filter(n=>n.status==='rejected').length}</div>
         <div class="stat-label">Rejected by You</div>
       </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.25rem;padding:1.25rem 1.5rem">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.9rem">
+        <div>
+          <div style="font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.2rem">Approval Quota — ${periodLabel}</div>
+          <div style="font-size:0.85rem;color:var(--text-soft)">Based on ${headcount} headcount in this DU &nbsp;·&nbsp; 1 approval per 50 employees</div>
+        </div>
+        <div style="text-align:right">
+          <span style="font-size:1.6rem;font-weight:700;color:${quotaColor};line-height:1">${approvedThisPeriod}</span>
+          <span style="font-size:1rem;color:var(--text-muted)"> / ${quota}</span>
+          <div style="font-size:0.75rem;color:${quotaColor};margin-top:0.1rem">${quotaFull ? '⚠ Quota reached' : quotaRemaining + ' remaining'}</div>
+        </div>
+      </div>
+      <div style="height:8px;border-radius:999px;background:rgba(255,255,255,0.07);overflow:hidden">
+        <div style="height:100%;width:${quotaPct}%;background:${quotaColor};border-radius:999px;transition:width 0.4s ease"></div>
+      </div>
+      ${quotaFull ? `<div style="margin-top:0.75rem;padding:0.6rem 0.85rem;background:rgba(240,112,112,0.1);border:1px solid rgba(240,112,112,0.25);border-radius:8px;font-size:0.8rem;color:#F07070">⚠ This DU has reached its nomination approval quota for ${periodLabel}. Additional approvals are not allowed this period.</div>` : ''}
     </div>
 
     <div class="tabs">
@@ -1779,6 +1810,20 @@ function renderReviewedCard(n) {
 function reviewNom(nomId, action) {
   const nom = nominations.find(n => n.id === nomId);
   if (!nom) return;
+
+  // Enforce quota on approvals
+  if (action === 'approved') {
+    const du = currentUser.du || '';
+    const period = nom.period || getDUCurrentPeriod();
+    const quota = getDUQuota(du);
+    const approvedSoFar = getDUApprovedCount(du, period);
+    if (approvedSoFar >= quota) {
+      const periodLabel = new Date(period + '-01').toLocaleString('default', { month: 'long', year: 'numeric' });
+      toast(`⚠ Quota reached — ${du} has used all ${quota} approval slot${quota !== 1 ? 's' : ''} for ${periodLabel}.`, 'warn');
+      return;
+    }
+  }
+
   const remEl = document.getElementById(`rem_${nomId}`);
   nom.status = action;
   nom.approverRemarks = remEl ? remEl.value.trim() : '';
@@ -1833,6 +1878,33 @@ function getFacility(empId) {
     if (prefixes.some(p => empId.startsWith(p))) return facility;
   }
   return 'IKSI-Leg'; // default for all other existing alphanumeric IDs
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─── NOMINATION QUOTA ────────────────────────────────────────────────────────
+// Quota: 1 nomination per 50 employees in the DU (rounded up), per period.
+// MUPAI projects are exempt from the nominee-level quota (see below).
+// This quota applies to approvals: the approver dashboard shows how many
+// nominations the DU is allowed to have APPROVED per period.
+function getDUHeadcount(du) {
+  return Object.values(EMPLOYEES).filter(e => e.du === du).length;
+}
+function getDUQuota(du) {
+  const headcount = getDUHeadcount(du);
+  if (!headcount) return 1;
+  return Math.max(1, Math.ceil(headcount / 50));
+}
+function getDUApprovedCount(du, period) {
+  return nominations.filter(n => {
+    const emp = EMPLOYEES[n.nomineeId];
+    const nomDU = (emp && emp.du) || n.nomineeDU || '';
+    return nomDU === du && n.status === 'approved' && (!period || (n.period || '') === period);
+  }).length;
+}
+function getDUCurrentPeriod() {
+  // Use the most recent nomination period in this DU, or current month
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -2230,10 +2302,27 @@ function buildDUEmailBody(du) {
   });
   if (!duNoms.length) return null;
 
+  // Quota info
+  const period = getDUCurrentPeriod();
+  const periodLabel = new Date(period + '-01').toLocaleString('default', { month: 'long', year: 'numeric' });
+  const quota = getDUQuota(du);
+  const headcount = getDUHeadcount(du);
+  const approvedThisPeriod = getDUApprovedCount(du, period);
+  const quotaRemaining = Math.max(0, quota - approvedThisPeriod);
+  const quotaFull = approvedThisPeriod >= quota;
+
   const lines = [
     `SPOT AWARDS — Pending Nominations for Review`,
     `Delivery Unit: ${du}`,
     `Generated: ${new Date().toLocaleString()}`,
+    `${'─'.repeat(60)}`,
+    ``,
+    `APPROVAL QUOTA STATUS — ${periodLabel}`,
+    `  DU Headcount   : ${headcount} employees`,
+    `  Quota (1 / 50) : ${quota} approval${quota !== 1 ? 's' : ''} allowed this period`,
+    `  Approved so far: ${approvedThisPeriod} / ${quota}`,
+    `  Remaining slots: ${quotaFull ? 'NONE — quota reached' : quotaRemaining}`,
+    ``,
     `${'─'.repeat(60)}`,
     ``,
     `You have ${duNoms.length} pending nomination${duNoms.length !== 1 ? 's' : ''} awaiting your approval:`,
@@ -2245,15 +2334,20 @@ function buildDUEmailBody(du) {
     lines.push(`${i + 1}. NOMINEE: ${n.nomineeName} (${n.nomineeId})`);
     lines.push(`   Designation: ${nominee.designation || '—'} | Dept: ${nominee.dept || '—'}`);
     lines.push(`   Category:    ${n.category}`);
-    lines.push(`   Nominated by: ${n.nominatorName} (${n.nominatorId})`);
-    lines.push(`   Date: ${new Date(n.createdAt).toLocaleDateString()}`);
-    lines.push(`   Achievement:`);
+    lines.push(`   Nominated by: ${n.managerName} (${n.managerEmpId})`);
+    lines.push(`   Period: ${n.period || '—'}`);
+    lines.push(`   Date Submitted: ${new Date(n.submittedAt).toLocaleDateString()}`);
+    lines.push(`   Citation:`);
     lines.push(`   ${n.achievement}`);
     if (n.evidence) { lines.push(`   Evidence: ${n.evidence}`); }
     lines.push(``);
   });
 
   lines.push(`${'─'.repeat(60)}`);
+  if (quotaFull) {
+    lines.push(`⚠ NOTE: This DU has reached its approval quota for ${periodLabel}. No further approvals can be made this period.`);
+    lines.push(``);
+  }
   lines.push(`Please log in to the Spot Awards Portal to Approve or Reject each nomination.`);
   lines.push(``);
   lines.push(`This is an automated notification from the Spot Awards Portal.`);
