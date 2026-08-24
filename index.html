@@ -162,20 +162,7 @@ body {
 .role-card[data-role="approver"] { --card-accent: #0D9488;  --card-glow: rgba(13,148,136,0.06); }
 .role-card[data-role="admin"]    { --card-accent: #2563EB;  --card-glow: rgba(37,99,235,0.06); }
 
-.role-icon {
-  font-size: 2.4rem;
-  margin-bottom: 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  background: #F4F6FB;
-  border: 1px solid rgba(0,0,0,0.07);
-}
 
-.role-icon img { width: 2.4rem; height: 2.4rem; object-fit: contain; }
 
 .role-name {
   font-family: 'Cinzel', serif;
@@ -875,83 +862,19 @@ textarea { resize: vertical; min-height: 100px; }
   <div class="role-cards">
     <div class="role-card" data-role="manager" onclick="showLogin('manager')">
       <span class="role-badge">Nominate</span>
-      <span class="role-icon"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:2.4rem;height:2.4rem">
-  <!-- Star/Trophy glow -->
-  <circle cx="32" cy="32" r="28" fill="url(#gN)" opacity="0.25"/>
-  <!-- Trophy cup -->
-  <path d="M22 14h20l-3 14c-1 4.5-4.5 8-7 9.5C29.5 36 26 32.5 25 28L22 14z" fill="url(#tN)" stroke="rgba(255,220,100,0.6)" stroke-width="1"/>
-  <!-- Trophy base -->
-  <rect x="28" y="38" width="8" height="3" rx="1" fill="#C9A84C" opacity="0.9"/>
-  <rect x="24" y="41" width="16" height="3" rx="1.5" fill="#C9A84C" opacity="0.7"/>
-  <!-- Handles -->
-  <path d="M22 18 Q16 18 16 24 Q16 30 22 30" stroke="rgba(255,220,100,0.7)" stroke-width="2" fill="none" stroke-linecap="round"/>
-  <path d="M42 18 Q48 18 48 24 Q48 30 42 30" stroke="rgba(255,220,100,0.7)" stroke-width="2" fill="none" stroke-linecap="round"/>
-  <!-- Stars around -->
-  <circle cx="18" cy="14" r="2" fill="#FFD700" opacity="0.7"/>
-  <circle cx="46" cy="12" r="1.5" fill="#FFD700" opacity="0.5"/>
-  <circle cx="50" cy="34" r="1.5" fill="#FFD700" opacity="0.4"/>
-  <circle cx="14" cy="36" r="1.5" fill="#FFD700" opacity="0.4"/>
-  <defs>
-    <radialGradient id="gN" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FFD700"/><stop offset="100%" stop-color="#C9A84C" stop-opacity="0"/></radialGradient>
-    <linearGradient id="tN" x1="32" y1="14" x2="32" y2="40" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FFE566"/><stop offset="100%" stop-color="#A0722A"/></linearGradient>
-  </defs>
-</svg></span>
-      <div class="role-name">Nominate</div>
+            <div class="role-name">Nominate</div>
       <div class="role-desc">Submit nominations for team members demonstrating outstanding performance, going the extra mile, or receiving exceptional customer feedback.</div>
       <span class="role-cta">Submit Nomination</span>
     </div>
     <div class="role-card" data-role="approver" onclick="showLogin('approver')">
       <span class="role-badge">Review</span>
-      <span class="role-icon"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:2.4rem;height:2.4rem">
-  <circle cx="32" cy="32" r="28" fill="url(#gA)" opacity="0.2"/>
-  <!-- Clipboard -->
-  <rect x="16" y="16" width="32" height="38" rx="4" fill="url(#cA)" stroke="rgba(78,205,180,0.5)" stroke-width="1"/>
-  <!-- Clipboard top clip -->
-  <rect x="26" y="12" width="12" height="8" rx="3" fill="#1a2940" stroke="rgba(78,205,180,0.5)" stroke-width="1"/>
-  <!-- Lines -->
-  <line x1="23" y1="30" x2="41" y2="30" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linecap="round"/>
-  <line x1="23" y1="36" x2="41" y2="36" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-linecap="round"/>
-  <line x1="23" y1="42" x2="35" y2="42" stroke="rgba(255,255,255,0.15)" stroke-width="2" stroke-linecap="round"/>
-  <!-- Checkmark seal -->
-  <circle cx="42" cy="44" r="10" fill="url(#sA)" stroke="rgba(78,205,180,0.4)" stroke-width="1"/>
-  <polyline points="37,44 41,48 47,40" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <defs>
-    <radialGradient id="gA" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#4ECDB4"/><stop offset="100%" stop-color="#4ECDB4" stop-opacity="0"/></radialGradient>
-    <linearGradient id="cA" x1="16" y1="16" x2="48" y2="54" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#1e3a4a"/><stop offset="100%" stop-color="#0f2030"/></linearGradient>
-    <linearGradient id="sA" x1="32" y1="34" x2="52" y2="54" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#4ECDB4"/><stop offset="100%" stop-color="#2a9d8f"/></linearGradient>
-  </defs>
-</svg></span>
-      <div class="role-name">Review and Approve</div>
+            <div class="role-name">Review and Approve</div>
       <div class="role-desc">Review pending nominations from your delivery unit, approve worthy candidates, and provide remarks to ensure award quality.</div>
       <span class="role-cta">View Pending Reviews</span>
     </div>
     <div class="role-card" data-role="admin" onclick="showLogin('admin')">
       <span class="role-badge">Manage</span>
-      <span class="role-icon"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:2.4rem;height:2.4rem">
-  <circle cx="32" cy="32" r="28" fill="url(#gD)" opacity="0.2"/>
-  <!-- Dashboard grid -->
-  <rect x="12" y="16" width="18" height="13" rx="3" fill="url(#d1)" stroke="rgba(126,184,245,0.4)" stroke-width="1"/>
-  <rect x="34" y="16" width="18" height="7" rx="3" fill="url(#d2)" stroke="rgba(126,184,245,0.3)" stroke-width="1"/>
-  <rect x="34" y="27" width="18" height="19" rx="3" fill="url(#d3)" stroke="rgba(126,184,245,0.3)" stroke-width="1"/>
-  <rect x="12" y="33" width="18" height="13" rx="3" fill="url(#d4)" stroke="rgba(126,184,245,0.3)" stroke-width="1"/>
-  <!-- Bar chart in first tile -->
-  <rect x="16" y="25" width="3" height="2" rx="1" fill="#7EB8F5" opacity="0.7"/>
-  <rect x="21" y="22" width="3" height="5" rx="1" fill="#7EB8F5" opacity="0.5"/>
-  <rect x="26" y="19" width="3" height="8" rx="1" fill="#7EB8F5" opacity="0.4"/>
-  <!-- Line chart in big right tile -->
-  <polyline points="37,40 41,35 45,38 49,30" stroke="#7EB8F5" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
-  <!-- Gear on bottom right tile -->
-  <circle cx="21" cy="39.5" r="4" stroke="#C9A84C" stroke-width="1.5" fill="none" opacity="0.7"/>
-  <circle cx="21" cy="39.5" r="1.5" fill="#C9A84C" opacity="0.6"/>
-  <defs>
-    <radialGradient id="gD" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#7EB8F5"/><stop offset="100%" stop-color="#7EB8F5" stop-opacity="0"/></radialGradient>
-    <linearGradient id="d1" x1="12" y1="16" x2="30" y2="29" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#1e3060"/><stop offset="100%" stop-color="#0f1840"/></linearGradient>
-    <linearGradient id="d2" x1="34" y1="16" x2="52" y2="23" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#1a2e50"/><stop offset="100%" stop-color="#0f1a30"/></linearGradient>
-    <linearGradient id="d3" x1="34" y1="27" x2="52" y2="46" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#182848"/><stop offset="100%" stop-color="#0a1428"/></linearGradient>
-    <linearGradient id="d4" x1="12" y1="33" x2="30" y2="46" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#1c2a44"/><stop offset="100%" stop-color="#0d1830"/></linearGradient>
-  </defs>
-</svg></span>
-      <div class="role-name">HR/Admin</div>
+            <div class="role-name">HR/Admin</div>
       <div class="role-desc">View all nominations across the organization, monitor approval status, and download reports by status or award category.</div>
       <span class="role-cta">Open Dashboard</span>
     </div>
@@ -1180,11 +1103,7 @@ function catClass(cat) {
   return 'cat-kudos';
 }
 
-function catIcon(cat) {
-  if (cat === 'Brilliant Performer') return '✨';
-  if (cat === 'Extra Mile') return '🚀';
-  return '💛';
-}
+function catIcon(cat) { return ''; }
 
 // ===================================================
 // MANAGER VIEW
@@ -1279,7 +1198,7 @@ function renderManager(mc) {
                   id="cat_${c.replace(/ /g,'_')}_label"
                   onclick="selectCat('${c}')">
                   <input type="radio" name="category" value="${c}" style="display:none"> 
-                  ${catIcon(c)} ${c}
+                  ${c}
                 </label>`).join('')}
             </div>
           </div>
@@ -1816,7 +1735,7 @@ function renderMyNominations(noms) {
                   </div>
                 </div>
               </td>
-              <td><span class="cat-chip ${catClass(n.category)}">${catIcon(n.category)} ${n.category}</span></td>
+              <td><span class="cat-chip ${catClass(n.category)}">${n.category}</span></td>
               <td style="color:var(--text-soft)">${n.period || '—'}</td>
               <td style="color:var(--text-soft)">${new Date(n.submittedAt).toLocaleDateString()}</td>
               <td><span class="badge badge-${n.status}">${n.status}</span></td>
@@ -1933,7 +1852,7 @@ function renderReviewCard(n) {
           </div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.4rem">
-          <span class="cat-chip ${catClass(n.category)}">${catIcon(n.category)} ${n.category}</span>
+          <span class="cat-chip ${catClass(n.category)}">${n.category}</span>
           <span style="font-size:0.72rem;color:var(--text-muted)">${new Date(n.submittedAt).toLocaleDateString()}</span>
         </div>
       </div>
@@ -1997,7 +1916,7 @@ function renderReviewedCard(n) {
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.4rem">
           <span class="badge badge-${n.status}">${n.status}</span>
-          <span class="cat-chip ${catClass(n.category)}" style="font-size:0.72rem">${catIcon(n.category)} ${n.category}</span>
+          <span class="cat-chip ${catClass(n.category)}" style="font-size:0.72rem">${n.category}</span>
         </div>
       </div>
       ${n.approverRemarks ? `<div style="font-size:0.82rem;color:var(--text-muted);background:rgba(255,255,255,0.03);padding:0.6rem 0.9rem;border-radius:6px">
@@ -3133,7 +3052,7 @@ function renderAdminTable() {
                 <div class="td-name" style="font-weight:400">${n.managerName}</div>
                 <div class="td-sub">${n.managerEmpId}</div>
               </td>
-              <td><span class="cat-chip ${catClass(n.category)}">${catIcon(n.category)} ${n.category}</span></td>
+              <td><span class="cat-chip ${catClass(n.category)}">${n.category}</span></td>
               <td style="color:var(--text-soft);font-size:0.82rem">${n.nomineeProject || '—'}<div class="td-sub">${n.nomineeProjectName || ''}</div></td>
               <td style="color:var(--text-soft)">${n.period || '—'}</td>
               <td style="color:var(--text-soft)">${new Date(n.submittedAt).toLocaleDateString()}</td>
