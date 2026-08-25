@@ -1058,6 +1058,18 @@ function doLogin() {
     }
   }
 
+  if (currentRole === 'approver') {
+    // Allow if assigned as approver for any DU, OR if employee's own DU has them assigned
+    const isAssigned = Object.values(approverAssignments).some(approvers =>
+      approvers.some(a => a.empId === id)
+    );
+    if (!isAssigned) {
+      errEl.textContent = 'You are not assigned as an approver for any Delivery Unit. Contact your HR/Admin.';
+      errEl.style.display = 'block';
+      return;
+    }
+  }
+
   currentUser = { ...emp, role: currentRole };
   enterApp();
 }
@@ -1249,9 +1261,9 @@ function renderManager(mc) {
               <span style="font-size:1rem;flex-shrink:0;margin-top:0.05rem">📎</span>
               <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6">
                 <strong style="color:var(--gold)">File naming convention:</strong>
-                Use format <code style="background:rgba(201,168,76,0.12);color:var(--gold);padding:0.1rem 0.4rem;border-radius:4px;font-size:0.76rem">USERNAME+FirstName</code>
-                &nbsp;— e.g. <code style="background:rgba(201,168,76,0.12);color:var(--gold);padding:0.1rem 0.4rem;border-radius:4px;font-size:0.76rem">GV6+John.jpg</code>&nbsp;
-                where <em>USERNAME</em> is the employee ID and <em>FirstName</em> is the awardee's first name.
+                Use format <code style="background:rgba(201,168,76,0.12);color:var(--gold);padding:0.1rem 0.4rem;border-radius:4px;font-size:0.76rem">UserID+Firstname Surname</code>
+                &nbsp;— e.g. <code style="background:rgba(201,168,76,0.12);color:var(--gold);padding:0.1rem 0.4rem;border-radius:4px;font-size:0.76rem">GV6+John Smith.jpg</code>&nbsp;
+                where <em>UserID</em> is the employee ID and <em>Firstname Surname</em> is the awardee's full name.
               </div>
             </div>
 
@@ -1288,7 +1300,11 @@ function renderManager(mc) {
         <div class="divider"></div>
         <div style="display:flex;justify-content:flex-end;gap:0.75rem">
           <button class="btn btn-ghost" onclick="resetForm()">Clear</button>
-          <button class="btn btn-gold" onclick="submitNomination()">Submit Nomination 🏆</button>
+          ${isNominationWindowClosed() ? `
+            <div style="padding:0.65rem 0.9rem;background:#FEE2E2;border:1px solid #FECACA;border-radius:8px;font-size:0.82rem;color:#DC2626;margin-bottom:0.75rem">
+              🚫 Nominations are closed from the 12th to the end of the month. The window reopens on the 1st.
+            </div>` : ''}
+          <button class="btn btn-gold" onclick="submitNomination()" ${isNominationWindowClosed() ? 'disabled style="opacity:0.45;cursor:not-allowed"' : ''}>Submit Nomination 🏆</button>
         </div>
       </div>
     </div>
@@ -1623,16 +1639,16 @@ function showPhotoPreview(file) {
   // Check naming convention: USERNAME+FirstName (with any extension)
   const conventionEl = document.getElementById('photoConventionCheck');
   const nameNoExt = file.name.replace(/\.[^.]+$/, '');
-  const conventionRegex = /^[A-Za-z0-9]+\+[A-Za-z]+$/;
+  const conventionRegex = /^[A-Za-z0-9]+\+[A-Za-z]+(\s[A-Za-z]+)*$/;
   if (conventionRegex.test(nameNoExt)) {
     const parts = nameNoExt.split('+');
     conventionEl.innerHTML = '<span style="color:#4ECDB4">\u2713 Filename follows convention &mdash; ' +
-      '<strong>' + parts[0] + '</strong> + <strong>' + parts[1] + '</strong></span>';
+      '<strong>' + parts[0] + '</strong> + <strong>' + parts.slice(1).join('+') + '</strong></span>';
   } else {
     conventionEl.innerHTML = '<span style="color:#F0B840">\u26A0 Filename doesn\'t match convention. ' +
-      'Expected: <code style="background:rgba(201,168,76,0.12);padding:0.05rem 0.35rem;border-radius:3px;font-size:0.72rem">USERNAME+FirstName.jpg</code>' +
+      'Expected: <code style="background:rgba(201,168,76,0.12);padding:0.05rem 0.35rem;border-radius:3px;font-size:0.72rem">UserID+Firstname Surname.jpg</code>' +
       '&nbsp;&mdash; e.g. <code style="background:rgba(201,168,76,0.12);padding:0.05rem 0.35rem;border-radius:3px;font-size:0.72rem">' +
-      (selectedNominee ? selectedNominee.id + '+' + selectedNominee.name.split(' ')[0] : 'EMP001+Juan') + '.jpg</code></span>';
+      (selectedNominee ? selectedNominee.id + '+' + selectedNominee.name.split(',').reverse().map(s=>s.trim()).join(' ') : 'EMP001+Juan Smith') + '.jpg</code></span>';
   }
 }
 
@@ -1647,13 +1663,18 @@ function clearPhoto(event) {
 }
 // ───────────────────────────────────────────────────────────
 
+function isNominationWindowClosed() {
+  return new Date().getDate() >= 12;
+}
+
 function submitNomination() {
+  if (isNominationWindowClosed()) { toast('🚫 Nominations are closed from the 12th to the end of the month.', 'warn'); return; }
   if (!selectedNominee) { toast('⚠️ Please select a nominee first.', 'warn'); return; }
   if (!selectedCat) { toast('⚠️ Please select an award category.', 'warn'); return; }
   const achievement = document.getElementById('achievement').value.trim();
   if (!achievement) { toast('⚠️ Please describe the specific achievement.', 'warn'); return; }
 
-  // ── Nomination quota: 1 per employee per period (Mepai projects exempt) ──
+  // ── Nomination allocation: 1 per employee per period (Mupai projects exempt) ──
   if (!isMupaiProject(selectedNominee.project)) {
     const period = document.getElementById('nomPeriod').value;
     const duplicate = nominations.find(n =>
@@ -1761,27 +1782,44 @@ function switchTab(showId, hideId, btn) {
 // ===================================================
 // APPROVER VIEW
 // ===================================================
+function getAssignedDUs(empId) {
+  // Returns all DUs where this employee is listed as an approver
+  const assigned = [];
+  Object.entries(approverAssignments).forEach(([du, approvers]) => {
+    if (approvers.some(a => a.empId === empId)) assigned.push(du);
+  });
+  return assigned;
+}
+
 function renderApprover(mc) {
-  const du = currentUser.du || '';
-  const pending = nominations.filter(n => n.status === 'pending' && (n.nomineeDU === du || n.managerDU === du));
+  const empDU = currentUser.du || '';
+  // Use assigned DUs from approver maintenance; fall back to employee's own DU
+  const assignedDUs = getAssignedDUs(currentUser.id);
+  const activeDUs = assignedDUs.length > 0 ? assignedDUs : [empDU];
+
+  const pending = nominations.filter(n =>
+    n.status === 'pending' && activeDUs.some(du => n.nomineeDU === du || n.managerDU === du)
+  );
   const reviewed = nominations.filter(n => n.status !== 'pending' && n.approvedBy === currentUser.id);
 
-  // Quota calculation
+  // Quota: aggregate across all assigned DUs
   const period = getDUCurrentPeriod();
-  const quota = getDUQuota(du);
-  const headcount = getDUHeadcount(du);
-  const approvedThisPeriod = getDUApprovedCount(du, period);
+  const quota = activeDUs.reduce((sum, du) => sum + getDUQuota(du), 0);
+  const headcount = activeDUs.reduce((sum, du) => sum + getDUHeadcount(du), 0);
+  const approvedThisPeriod = activeDUs.reduce((sum, du) => sum + getDUApprovedCount(du, period), 0);
   const quotaRemaining = Math.max(0, quota - approvedThisPeriod);
   const quotaPct = Math.min(100, quota > 0 ? Math.round((approvedThisPeriod / quota) * 100) : 0);
   const quotaFull = approvedThisPeriod >= quota;
-  const quotaColor = quotaFull ? '#F07070' : quotaPct >= 80 ? '#F0A04E' : '#4ECDB4';
+  const quotaColor = quotaFull ? '#DC2626' : quotaPct >= 80 ? '#D97706' : '#0D9488';
   const periodLabel = new Date(period + '-01').toLocaleString('default', { month: 'long', year: 'numeric' });
+
+  const duLabel = activeDUs.length === 1 ? activeDUs[0] : `${activeDUs.length} Delivery Units`;
 
   mc.innerHTML = `
     <div class="section-header">
       <div>
         <div class="section-title">Nomination Review</div>
-        <div class="section-subtitle">Reviewing nominations for: <strong style="color:var(--gold)">${du || 'Your Delivery Unit'}</strong></div>
+        <div class="section-subtitle">Reviewing nominations for: <strong style="color:var(--gold)">${duLabel}</strong>${activeDUs.length > 1 ? ` <span style="font-size:0.75rem;color:var(--text-muted)">(${activeDUs.join(', ')})</span>` : ''}</div>
       </div>
     </div>
 
@@ -1803,19 +1841,19 @@ function renderApprover(mc) {
     <div class="card" style="margin-bottom:1.25rem;padding:1.25rem 1.5rem">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.9rem">
         <div>
-          <div style="font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.2rem">Approval Quota — ${periodLabel}</div>
-          <div style="font-size:0.85rem;color:var(--text-soft)">Based on ${headcount} headcount in this DU &nbsp;·&nbsp; 1 approval per 50 employees</div>
+          <div style="font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.2rem">Nomination Allocation — ${periodLabel}</div>
+          <div style="font-size:0.85rem;color:var(--text-soft)">Based on ${headcount} headcount in this DU &nbsp;·&nbsp; 1 nomination per 30 employees</div>
         </div>
         <div style="text-align:right">
           <span style="font-size:1.6rem;font-weight:700;color:${quotaColor};line-height:1">${approvedThisPeriod}</span>
           <span style="font-size:1rem;color:var(--text-muted)"> / ${quota}</span>
-          <div style="font-size:0.75rem;color:${quotaColor};margin-top:0.1rem">${quotaFull ? '⚠ Quota reached' : quotaRemaining + ' remaining'}</div>
+          <div style="font-size:0.75rem;color:${quotaColor};margin-top:0.1rem">${quotaFull ? '⚠ Allocation reached' : quotaRemaining + ' remaining'}</div>
         </div>
       </div>
       <div style="height:8px;border-radius:999px;background:rgba(255,255,255,0.07);overflow:hidden">
         <div style="height:100%;width:${quotaPct}%;background:${quotaColor};border-radius:999px;transition:width 0.4s ease"></div>
       </div>
-      ${quotaFull ? `<div style="margin-top:0.75rem;padding:0.6rem 0.85rem;background:rgba(240,112,112,0.1);border:1px solid rgba(240,112,112,0.25);border-radius:8px;font-size:0.8rem;color:#F07070">⚠ This DU has reached its nomination approval quota for ${periodLabel}. Additional approvals are not allowed this period.</div>` : ''}
+      ${quotaFull ? `<div style="margin-top:0.75rem;padding:0.6rem 0.85rem;background:rgba(240,112,112,0.1);border:1px solid rgba(240,112,112,0.25);border-radius:8px;font-size:0.8rem;color:#F07070">⚠ This DU has reached its nomination allocation for ${periodLabel}. Additional approvals are not allowed this period.</div>` : ''}
     </div>
 
     <div class="tabs">
@@ -1907,6 +1945,7 @@ function renderReviewCard(n) {
 }
 
 function renderReviewedCard(n) {
+  const isRejected = n.status === 'rejected';
   return `
     <div class="nom-review-card">
       <div class="nom-review-header">
@@ -1919,24 +1958,60 @@ function renderReviewedCard(n) {
           <span class="cat-chip ${catClass(n.category)}" style="font-size:0.72rem">${n.category}</span>
         </div>
       </div>
-      ${n.approverRemarks ? `<div style="font-size:0.82rem;color:var(--text-muted);background:rgba(255,255,255,0.03);padding:0.6rem 0.9rem;border-radius:6px">
+      ${n.approverRemarks ? `<div style="font-size:0.82rem;color:var(--text-muted);background:rgba(255,255,255,0.03);padding:0.6rem 0.9rem;border-radius:6px;margin-bottom:0.75rem">
         <strong style="color:var(--text-soft)">Your remarks:</strong> ${n.approverRemarks}</div>` : ''}
+      ${isRejected ? `
+        <div style="border-top:1px solid rgba(0,0,0,0.07);padding-top:0.85rem;margin-top:0.5rem">
+          <div style="font-size:0.78rem;color:#6B7280;margin-bottom:0.5rem;font-weight:500">Re-approve this nomination?</div>
+          <textarea id="rerem_${n.id}" placeholder="Updated remarks (optional)…" rows="2"
+            style="font-size:0.82rem;margin-bottom:0.6rem;resize:vertical"></textarea>
+          <button class="btn btn-approve" onclick="reapproveNom('${n.id}')"
+            style="font-size:0.8rem;padding:0.4rem 1rem">
+            ✅ Re-approve
+          </button>
+        </div>` : ''}
     </div>`;
+}
+
+function reapproveNom(nomId) {
+  const nom = nominations.find(n => n.id === nomId);
+  if (!nom || nom.status !== 'rejected') return;
+
+  // Enforce allocation on re-approval
+  const nomDU = (EMPLOYEES[nom.nomineeId] || {}).du || nom.nomineeDU || currentUser.du || '';
+  const period = nom.period || getDUCurrentPeriod();
+  const quota = getDUQuota(nomDU);
+  const approvedSoFar = getDUApprovedCount(nomDU, period);
+  if (approvedSoFar >= quota) {
+    const periodLabel = new Date(period + '-01').toLocaleString('default', { month: 'long', year: 'numeric' });
+    toast(`⚠ Allocation reached — ${nomDU} has used all ${quota} allocation slot${quota !== 1 ? 's' : ''} for ${periodLabel}.`, 'warn');
+    return;
+  }
+
+  const remEl = document.getElementById(`rerem_${nomId}`);
+  nom.status = 'approved';
+  nom.approverRemarks = remEl ? remEl.value.trim() : '';
+  nom.approvedBy = currentUser.id;
+  nom.approvedAt = new Date().toISOString();
+  saveNominations();
+  toast('✅ Nomination re-approved!', 'success');
+  const mc = document.getElementById('mainContent');
+  renderApprover(mc);
 }
 
 function reviewNom(nomId, action) {
   const nom = nominations.find(n => n.id === nomId);
   if (!nom) return;
 
-  // Enforce quota on approvals
+  // Enforce quota on approvals (check the DU of the nominee being approved)
   if (action === 'approved') {
-    const du = currentUser.du || '';
+    const nomDU = (EMPLOYEES[nom.nomineeId] || {}).du || nom.nomineeDU || currentUser.du || '';
     const period = nom.period || getDUCurrentPeriod();
-    const quota = getDUQuota(du);
-    const approvedSoFar = getDUApprovedCount(du, period);
+    const quota = getDUQuota(nomDU);
+    const approvedSoFar = getDUApprovedCount(nomDU, period);
     if (approvedSoFar >= quota) {
       const periodLabel = new Date(period + '-01').toLocaleString('default', { month: 'long', year: 'numeric' });
-      toast(`⚠ Quota reached — ${du} has used all ${quota} approval slot${quota !== 1 ? 's' : ''} for ${periodLabel}.`, 'warn');
+      toast(`⚠ Allocation reached — ${nomDU} has used all ${quota} allocation slot${quota !== 1 ? 's' : ''} for ${periodLabel}.`, 'warn');
       return;
     }
   }
@@ -1998,9 +2073,9 @@ function getFacility(empId) {
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ─── NOMINATION QUOTA ────────────────────────────────────────────────────────
-// Quota: 1 nomination per 50 employees in the DU (rounded up), per period.
-// MUPAI projects are exempt from the nominee-level quota (see below).
+// ─── NOMINATION ALLOCATION ──────────────────────────────────────────────────
+// Allocation: 1 nomination per 30 employees in the DU (rounded up), per period.
+// MUPAI projects are exempt from the nominee-level allocation (see below).
 // This quota applies to approvals: the approver dashboard shows how many
 // nominations the DU is allowed to have APPROVED per period.
 function getDUHeadcount(du) {
@@ -2009,7 +2084,7 @@ function getDUHeadcount(du) {
 function getDUQuota(du) {
   const headcount = getDUHeadcount(du);
   if (!headcount) return 1;
-  return Math.max(1, Math.ceil(headcount / 50));
+  return Math.max(1, Math.ceil(headcount / 30));
 }
 function getDUApprovedCount(du, period) {
   return nominations.filter(n => {
@@ -2436,7 +2511,7 @@ function buildDUEmailBody(du) {
     ``,
     `APPROVAL QUOTA STATUS — ${periodLabel}`,
     `  DU Headcount   : ${headcount} employees`,
-    `  Quota (1 / 50) : ${quota} approval${quota !== 1 ? 's' : ''} allowed this period`,
+    `  Allocation (1 / 30) : ${quota} approval${quota !== 1 ? 's' : ''} allowed this period`,
     `  Approved so far: ${approvedThisPeriod} / ${quota}`,
     `  Remaining slots: ${quotaFull ? 'NONE — quota reached' : quotaRemaining}`,
     ``,
