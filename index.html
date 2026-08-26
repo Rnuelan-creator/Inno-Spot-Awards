@@ -3107,6 +3107,7 @@ function renderAdminTable() {
         <thead>
           <tr>
             <th>Nominee</th>
+            <th>Facility</th>
             <th>Nominated By</th>
             <th>Category</th>
             <th>Project</th>
@@ -3123,6 +3124,7 @@ function renderAdminTable() {
                 <div class="td-name">${n.nomineeName}</div>
                 <div class="td-sub">${n.nomineeId} · ${n.nomineeDesignation}</div>
               </td>
+              <td style="font-size:0.82rem;font-weight:600;color:var(--text-soft)">${getFacility(n.nomineeId)}</td>
               <td>
                 <div class="td-name" style="font-weight:400">${n.managerName}</div>
                 <div class="td-sub">${n.managerEmpId}</div>
@@ -3148,7 +3150,7 @@ function downloadCSV(statusFilter) {
 
   const headers = [
     'Nomination ID','Submitted Date','Period','Status',
-    'Nominee ID','Nominee Name','Designation','Department','Project Code','Project Name','Nominee DU',
+    'Nominee ID','Nominee Name','Designation','Department','Project Code','Project Name','Nominee DU','Facility',
     'Category','Achievement','Supporting Evidence',
     'Manager ID','Manager Name','Manager DU',
     'Approver ID','Approved/Rejected Date','Approver Remarks'
@@ -3156,7 +3158,7 @@ function downloadCSV(statusFilter) {
 
   const rows = noms.map(n => [
     n.id, new Date(n.submittedAt).toLocaleDateString(), n.period || '', n.status,
-    n.nomineeId, n.nomineeName, n.nomineeDesignation, n.nomineeDept, n.nomineeProject, n.nomineeProjectName, n.nomineeDU,
+    n.nomineeId, n.nomineeName, n.nomineeDesignation, n.nomineeDept, n.nomineeProject, n.nomineeProjectName, n.nomineeDU, getFacility(n.nomineeId),
     n.category, `"${(n.achievement||'').replace(/"/g,'""')}"`, `"${(n.evidence||'').replace(/"/g,'""')}"`,
     n.managerEmpId, n.managerName, n.managerDU,
     n.approvedBy || '', n.approvedAt ? new Date(n.approvedAt).toLocaleDateString() : '', `"${(n.approverRemarks||'').replace(/"/g,'""')}"`
