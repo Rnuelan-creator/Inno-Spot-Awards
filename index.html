@@ -3156,12 +3156,13 @@ function downloadCSV(statusFilter) {
     'Approver ID','Approved/Rejected Date','Approver Remarks'
   ];
 
+  const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const rows = noms.map(n => [
-    n.id, new Date(n.submittedAt).toLocaleDateString(), n.period || '', n.status,
-    n.nomineeId, n.nomineeName, n.nomineeDesignation, n.nomineeDept, n.nomineeProject, n.nomineeProjectName, n.nomineeDU, getFacility(n.nomineeId),
-    n.category, `"${(n.achievement||'').replace(/"/g,'""')}"`, `"${(n.evidence||'').replace(/"/g,'""')}"`,
-    n.managerEmpId, n.managerName, n.managerDU,
-    n.approvedBy || '', n.approvedAt ? new Date(n.approvedAt).toLocaleDateString() : '', `"${(n.approverRemarks||'').replace(/"/g,'""')}"`
+    q(n.id), q(new Date(n.submittedAt).toLocaleDateString()), q(n.period || ''), q(n.status),
+    q(n.nomineeId), q(n.nomineeName), q(n.nomineeDesignation), q(n.nomineeDept), q(n.nomineeProject), q(n.nomineeProjectName), q(n.nomineeDU), q(getFacility(n.nomineeId)),
+    q(n.category), q(n.achievement || ''), q(n.evidence || ''),
+    q(n.managerEmpId), q(n.managerName), q(n.managerDU),
+    q(n.approvedBy || ''), q(n.approvedAt ? new Date(n.approvedAt).toLocaleDateString() : ''), q(n.approverRemarks || '')
   ]);
 
   const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
